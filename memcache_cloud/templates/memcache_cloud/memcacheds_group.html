@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+
+{% block title %}Memcacheds in group {{ group_id }} {% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='c/memcached.css') }}" media="all" />
+{% endblock %}
+
+{% block main %}
+<ul class="breadcrumb">
+  <li>
+    <a href="/">Home</a> <span class="divider">/</span>
+  </li>
+  <li>
+    <a href="/memcacheds">Memcacheds</a> <span class="divider">/</span>
+  </li>
+  <li class="active">Memcacheds in group {{ group_id }}</li>
+</ul>
+
+<div class="well">
+    <p>
+    <a class="btn btn-large btn-primary" href="/memcached-add"><i class="icon-plus icon-white"></i> Add Memcached</a>
+    </p>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr><th>#</th><th>Group</th><th>Instance</th><th>Operation</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+        {% for memcached in memcacheds %} {% set memcached_addr = memcached.ip + ':' + memcached.port|string %}
+        <tr>
+            <td>{{ memcached.id }}</td>
+            <td>{{ memcached.group_name }}</td>
+            <td><a href="/memcached-{{ memcached.id }}">{{ memcached_addr }}</a></td>
+            <td>
+                <a href="#" title="restart {{ memcached_addr }}" memcached_id="{{ memcached.id }}" class="memcached_restart"><i class="icon-refresh" ></i></a>
+                <a href="#" title="stop {{ memcached_addr }}" memcached_id="{{ memcached.id }}" class="memcached_stop"><i class="icon-stop" ></i></a>
+                <a href="#" title="start {{ memcached_addr }}" memcached_id="{{ memcached.id }}" class="memcached_start"><i class="icon-play" ></i></a>
+                <a href="#" title="delete {{ memcached_addr }}" memcached_id="{{ memcached.id }}" class="memcached_delete"><i class="icon-remove" ></i></a>
+                &nbsp;&nbsp;&nbsp;<a href="/memcached-edit-{{ memcached.id }}" title="edit {{ memcached_addr }}" target="_blank"><i class="icon-pencil"></i></a>
+            </td>
+            <td id="status_{{ memcached.id }}" style="width:100px;">{{ memcached.status }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Search In Group</h3>
+    <div>
+        <form class="form-horizontal">
+            <div class="alert" style="display:none;" id="search_data_notice">
+                <button class="close" data-dismiss="alert">×</button>
+                <span id="search_data_msg"> </span>
+            </div>
+
+            <div class="control-group">
+                <input type="text" id="key" class="input-medium search-query" placeholder="Type key">
+                <button type="button" class="btn" id="search_key_btn">Search</button>
+            </div>
+
+            <div class="control-group" id="search_data_result" style="margin:10px 10px 0 10px;">
+            </div>
+            <div id="search_loading"><img src="{{ url_for('static', filename='loading.gif') }}" /></div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block footer_script %}
+    <script type="text/javascript">
+        $(function() {
+                $('.memcached_stop').click(function() {
+                    if (! confirm('Are you sure to ' + $(this).attr('title') + '?')) {
+                        return false;
+                    }
+                    var memcached_id = $(this).attr('memcached_id');
+                    
+                    $.ajax({
+                        url : "/memcached-" + memcached_id + "-stop",
+                        type : 'post',
+                        dataType : "json",
+                           
+                    }).done(function(result) {
+                        $("#status_" + memcached_id).html(result.status);
+                        self.location.reload();
+                    });
+                });
+                $('.memcached_start').click(function(){
+                    if (! confirm('Are you sure to ' + $(this).attr('title') + '?')) {
+                        return false;
+                    }
+                    var memcached_id = $(this).attr('memcached_id');
+                    $.ajax({
+                        url : "/memcached-" + memcached_id + "-start",
+                        type : 'post',
+                        dataType : "json",
+                    }).done(function(result) {
+                        $("#status_" + memcached_id).html(result.status);
+                        self.location.reload();
+                    });
+                });
+                $('.memcached_restart').click(function(){
+                    if (! confirm('Are you sure to ' + $(this).attr('title') + '?')) {
+                        return false;
+                    }
+                    var memcached_id = $(this).attr('memcached_id');
+                    $.ajax({
+                        url : "/memcached-" + memcached_id + "-restart",
+                        type : 'post',
+                        dataType : "json",
+                    }).done(function(result){
+                        $("#status_" + memcached_id).html(result.status);
+                        self.location.reload();
+                    });
+                });
+                $('.memcached_delete').click(function() {
+                    if (! confirm('Are you sure to delete the memcached process?')) {
+                        return false;
+                    }
+                    var memcached_id = $(this).attr('memcached_id');
+                    $.ajax({
+                        url : "/memcached-" + memcached_id + "-delete",
+                        type : 'post',
+                        dataType : "json",
+                    }).done(function(result){
+                        $("#status_" + memcached_id).html(result.status);
+                        self.location.reload();
+                    });
+                });
+
+                $('#search_key_btn').click(function() {
+                    $('#search_loading').show();
+                    $('#search_data_result').html('');
+                    var key = $('#key').val();
+                    $.ajax({
+                        url : "/memcached/group-data/" + {{ group_id }},
+                        dataType : "json",
+                        type : 'post',
+                        data : {'key' : key}
+                    }).done(function(result) {
+                        if (result.status == 'ok') {
+                            $('#search_data_result').val(result.data);
+                            var html='<h4>Search Result</h4><dl>';
+                            for (key in result.data) {
+                                html += '<dt>' + key  + '</dt>';
+                                html += '<dd>' + result.data[key]+ '</dd>';
+                            }
+                            html += '</dl>';
+                            $('#search_data_result').html(html);
+                        } else {
+                            $('#search_data_result').html(result.msg);
+                        }
+                        $('#search_loading').hide();
+                    });
+
+                });
+
+
+        });
+    </script>
+{% endblock %}

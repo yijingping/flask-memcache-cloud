@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock%} | Memcache Cloud</title>
+    <link rel="shortcut icon" href="{{ url_for('favicon') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" media="all" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='c/mc.css') }}" media="all" />
+    {% block head_css %}{% endblock %}
+    {#
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.min.css') }}" media="all" />
+    #}
+    <script src="{{ url_for('static', filename='jquery-1.7.1.min.js') }}"></script> 
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    {% block head_script %}{% endblock %}
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="/">Home</a>
+            <div class="nav-collapse">
+            <ul class="nav">
+                <li>
+                <a href="/groups">Groups</a>
+                </li>
+                <li>
+                <a href="/hosts">Hosts</a>
+                </li>
+                <li>
+                <a href="/memcacheds">Memcacheds</a>
+                </li>
+                <li>
+                <a href="/helps">Helps</a>
+                </li>
+            </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+<header id="header">
+</header>
+
+<div id="main" class="row" style="margin-left:0px">
+    {% block main %}{% endblock %}
+</div>
+
+<footer>
+    <p>Memcache Cloud 0.31. powered by sysdev</p>
+</footer>
+
+</div>
+
+{% block footer_script %}{% endblock %}
+</body>
+</html>

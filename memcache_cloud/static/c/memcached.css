@@ -1,0 +1,23 @@
+/*
+#hits_stats { width:50%; height:300px; float:left; }
+*/
+#hits_stats, #usage_stats { height:300px; }
+#slabs_stats {width:100%; height:300px;}
+
+.well h3 {margin:10px; }
+#slab_key_prefix {
+    margin:20px auto auto auto;
+}
+#prefix_loading, #search_loading {
+    text-align:center;
+    display:none;
+    line-height:80px;
+}
+
+.table caption {
+    font-size:14px;
+    font-weight:bold;
+    text-align:left;
+    margin:20px 0 10px 10px;
+}
+
